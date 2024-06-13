@@ -11,7 +11,7 @@ export function wrapIntoDiv(html: string): string {
 }
 
 export function closeSelfClosingTags(html: string): string {
-    validateHTML(html);
+    validateHtml(html);
 
     const selfClosingTagPattern = new RegExp(`<(${SELF_CLOSING_TAGS.join('|')})([^>]*)\s*/?>`, 'g');
 
@@ -21,7 +21,7 @@ export function closeSelfClosingTags(html: string): string {
 }
 
 export function convertEventAttributesToCamelCase(html: string): string {
-    validateHTML(html);
+    validateHtml(html);
 
     const eventAttributesPattern = /(\bon\w+)=["']([^"']+)["']/g;
     
@@ -36,25 +36,25 @@ export function convertEventAttributesToCamelCase(html: string): string {
 }
 
 export function convertClassToClassName(html: string): string {
-    validateHTML(html);
+    validateHtml(html);
 
     return html.replace(/class=/g, 'className=');
 }
 
 export function removeComments(html: string): string {
-    validateHTML(html);
+    validateHtml(html);
 
     return html.replace(/<!--[\s\S]*?-->/g, '');
 }
 
 export function indentAllLines(html: string): string {
-  validateHTML(html);
+  validateHtml(html);
 
   return beautify(html, {format: 'html'});
 }
 
 export function convertStyleToObject(html: string): string {
-    validateHTML(html);
+    validateHtml(html);
 
     return html.replace(/style="([^"]*)"/g, (match, style) => {
         const styleObject = {};
@@ -70,7 +70,7 @@ export function convertStyleToObject(html: string): string {
     });
 }
 
-export function validateHTML(html: string): string {
+export function validateHtml(html: string): string {
   if (typeof html !== 'string') {
       throw new TypeError('Input must be a string');
   }
@@ -97,7 +97,7 @@ export function validateHTML(html: string): string {
 }
 
 export default function convert(html: string): string {
-  validateHTML(html);
+  validateHtml(html);
   html = wrapIntoDiv(html);
   html = closeSelfClosingTags(html);
   html = convertEventAttributesToCamelCase(html);

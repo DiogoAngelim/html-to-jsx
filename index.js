@@ -8,14 +8,14 @@ export function wrapIntoDiv(html) {
     `;
 }
 export function closeSelfClosingTags(html) {
-    validateHTML(html);
+    validateHtml(html);
     const selfClosingTagPattern = new RegExp(`<(${SELF_CLOSING_TAGS.join('|')})([^>]*)\s*/?>`, 'g');
     return html.replace(selfClosingTagPattern, (match, tagName, attributes) => {
         return `<${tagName}${attributes ? attributes : ''}/>`;
     }).replace(/\/\/>/g, '/>');
 }
 export function convertEventAttributesToCamelCase(html) {
-    validateHTML(html);
+    validateHtml(html);
     const eventAttributesPattern = /(\bon\w+)=["']([^"']+)["']/g;
     return html.replace(eventAttributesPattern, (match, eventName, handler) => {
         eventName = eventName.slice(2).split('');
@@ -26,19 +26,19 @@ export function convertEventAttributesToCamelCase(html) {
     });
 }
 export function convertClassToClassName(html) {
-    validateHTML(html);
+    validateHtml(html);
     return html.replace(/class=/g, 'className=');
 }
 export function removeComments(html) {
-    validateHTML(html);
+    validateHtml(html);
     return html.replace(/<!--[\s\S]*?-->/g, '');
 }
 export function indentAllLines(html) {
-    validateHTML(html);
+    validateHtml(html);
     return beautify(html, { format: 'html' });
 }
 export function convertStyleToObject(html) {
-    validateHTML(html);
+    validateHtml(html);
     return html.replace(/style="([^"]*)"/g, (match, style) => {
         const styleObject = {};
         style.split(';').forEach(property => {
@@ -50,7 +50,7 @@ export function convertStyleToObject(html) {
         return `style={${JSON.stringify(styleObject)}}`;
     });
 }
-export function validateHTML(html) {
+export function validateHtml(html) {
     if (typeof html !== 'string') {
         throw new TypeError('Input must be a string');
     }
@@ -70,7 +70,7 @@ export function validateHTML(html) {
     return 'HTML is valid.';
 }
 export default function convert(html) {
-    validateHTML(html);
+    validateHtml(html);
     html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
     html = convertEventAttributesToCamelCase(html);
