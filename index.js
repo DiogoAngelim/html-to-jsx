@@ -55,7 +55,7 @@ export function validateHtml(html) {
         throw new TypeError('Input must be a string');
     }
     const tagPattern = /<([^\s>\/]+)/g;
-    const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'input', 'button', 'textarea', 'select', 'option', 'a']);
+    const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
     let match;
     const errors = [];
     while ((match = tagPattern.exec(html)) !== null) {
