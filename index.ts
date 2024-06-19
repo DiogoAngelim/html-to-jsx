@@ -1,103 +1,99 @@
 import beautify from 'beautify';
 
-const SELF_CLOSING_TAGS = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
+const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
+const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
 
 export function wrapIntoDiv(html: string): string {
-    return `
-    <div>
-      ${html}
-    </div>
-    `;
+    return `<div>${html}</div>`;
+}
+
+const eventAttributesCallback = (_match: any, eventName: string, handler: string): string => {
+    const newEventName = eventName.slice(2).split('');
+    newEventName.shift();
+
+    return `on${eventName[0].toUpperCase() + newEventName.join('')}={${handler}}`;
 }
 
 export function closeSelfClosingTags(html: string): string {
-    validateHtml(html);
-
-    const selfClosingTagPattern = new RegExp(`<(${SELF_CLOSING_TAGS.join('|')})([^>]*)\s*/?>`, 'g');
-
-    return html.replace(selfClosingTagPattern, (match, tagName, attributes) => {
-        return `<${tagName}${attributes ? attributes : ''}/>`;
-    }).replace(/\/\/>/g, '/>');
+    return html.replace(new RegExp(`<(${selfClosingTags.join('|')})([^>]*)\s*/?>`, 'gi'), (_match, tagName, attributes) =>  `<${tagName}${attributes ? attributes : ''}/>`).replace(/\/\/>/g, '/>');
 }
 
-export function convertEventAttributesToCamelCase(html: string): string {
-    validateHtml(html);
-
-    const eventAttributesPattern = /(\bon\w+)=["']([^"']+)["']/g;
-    
-    return html.replace(eventAttributesPattern, (match, eventName, handler) => {
-        eventName = eventName.slice(2).split('');
-        const eventNameChar = eventName[0].toUpperCase();
-        eventName.shift();
-        eventName = eventNameChar + eventName.join('');
-
-        return `on${eventName}={${handler}}`;
-    });
+export function convertEventAttributesToCamelCase(html: string): string {    
+    return html.replace(/(\bon\w+)=["']([^"']+)["']/g, eventAttributesCallback);
 }
 
 export function convertClassToClassName(html: string): string {
-    validateHtml(html);
-
     return html.replace(/class=/g, 'className=');
 }
 
 export function removeComments(html: string): string {
-    validateHtml(html);
-
     return html.replace(/<!--[\s\S]*?-->/g, '');
 }
 
 export function indentAllLines(html: string): string {
-  validateHtml(html);
-
   return beautify(html, {format: 'html'});
 }
 
-export function convertStyleToObject(html: string): string {
-    validateHtml(html);
+const getProperties = (property: string): string[] => {
+    return property.split(':').map((prop: string) => prop.trim());
+}
 
-    return html.replace(/style="([^"]*)"/g, (match, style) => {
-        const styleObject = {};
+const getStyle = (style: string): any => {
+    const styleObject = {};
 
-        style.split(';').forEach(property => {
-            const [key, value] = property.split(':').map((prop: string) => prop.trim());
-            if (key && value) {
-                styleObject[key] = value;
-            }
-        });
-
-        return `style={${JSON.stringify(styleObject)}}`;
+    style.split(';').forEach((property: string): void => {
+        const [key, value] = getProperties(property);
+        
+        if (key && value) {
+            styleObject[key] = value;
+        }
     });
+
+    return JSON.stringify(styleObject);
+}
+
+const styleReplaceCallback = (_match: any, style: string): string => {
+    return `style={${getStyle(style)}}`;
+}
+
+export function convertStyleToObject(html: string): string {
+    return html.replace(/style="([^"]*)"/g, styleReplaceCallback);
+}
+
+const isTagClosed = (tag: string, html: string): boolean => {
+    return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag) && !html.includes(`</${tag}>`);
+}
+
+const validateInput = (html: string): void => {
+    if (typeof html !== 'string' || html.trim() === '' || !html) {
+      throw new TypeError('Input must be valid a string.');
+    }
+}
+
+const validateTag = (tag: string, html: string): void => {
+    if (!isTagClosed(tag, html)) {
+        throw new Error(`Tag <${tag}> is not closed.`);
+    }
+}
+
+const validateTags = (html: string): void => {
+  let match: any;
+
+  while ((match = /<([^\s>\/]+)/g.exec(html)) !== null) {
+    validateTag(match[1].toLowerCase(), html);
+  }
 }
 
 export function validateHtml(html: string): string {
-  if (typeof html !== 'string') {
-      throw new TypeError('Input must be a string');
-  }
-
-  const tagPattern = /<([^\s>\/]+)/g;
-  const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
-
-  let match: any;
-  const errors: string[] = [];
-
-  while ((match = tagPattern.exec(html)) !== null) {
-      const tag = match[1].toLowerCase();
-
-      if (!SELF_CLOSING_TAGS.includes(tag) && tagsRequiringClosing.has(tag) && !html.includes(`</${tag}>`)) {
-          errors.push(`Tag <${tag}> is not closed.`);
-      }
-  }
-
-  if (errors.length > 0) {
-      throw new Error(errors.join(' '));
-  }
+  validateInput(html);
+  validateTags(html);
 
   return 'HTML is valid.';
 }
 
 export default function convert(html: string): string {
   validateHtml(html);
+
   html = wrapIntoDiv(html);
   html = closeSelfClosingTags(html);
   html = convertEventAttributesToCamelCase(html);
