@@ -60,8 +60,8 @@ export function convertStyleToObject(html: string): string {
     return html.replace(/style="([^"]*)"/g, styleReplaceCallback);
 }
 
-const isTagClosed = (tag: string, html: string): boolean => {
-    return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag) && !html.includes(`</${tag}>`);
+const isTagClosed = (tag: string): boolean => {
+    return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
 }
 
 const validateInput = (html: string): void => {
@@ -70,8 +70,8 @@ const validateInput = (html: string): void => {
     }
 }
 
-const validateTag = (tag: string, html: string): void => {
-    if (!isTagClosed(tag, html)) {
+const validateTag = (tag: string): void => {
+    if (!isTagClosed(tag)) {
         throw new Error(`Tag <${tag}> is not closed.`);
     }
 }
@@ -80,7 +80,7 @@ const validateTags = (html: string): void => {
   let match: any;
 
   while ((match = /<([^\s>\/]+)/g.exec(html)) !== null) {
-    validateTag(match[1].toLowerCase(), html);
+    validateTag(match[1].toLowerCase());
   }
 }
 
