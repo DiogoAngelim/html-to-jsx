@@ -4,6 +4,7 @@ import {
   convertClassToClassName,
   removeComments,
   validateHtml,
+  convertInlineStyles
 } from '../index.js';
 
 describe('HTML to JSX Converter Tests', () => {
