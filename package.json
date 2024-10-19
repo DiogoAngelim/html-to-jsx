@@ -1,5 +1,5 @@
 {
-  "version": "1.2.1",
+  "version": "1.2.3",
   "name": "node-html-to-jsx",
   "description": "The HTML to JSX Converter is a Node.js module that seamlessly transforms HTML markup into JSX syntax, ideal for React projects. ",
   "main": "index.js",

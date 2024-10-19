@@ -1,5 +1,4 @@
 import beautify from 'beautify';
-import parse from 'style-to-object';
 import cssToObject from 'css-to-object';
 
 const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
@@ -10,20 +9,9 @@ export function wrapIntoDiv(html: string): string {
 }
 
 const eventAttributesCallback = (_match: any, eventName: string, handler: string): string => {
-    const newEventName = eventName.slice(2).split('');
-    newEventName.shift();
+    let newEventName = eventName.slice(2).split('')[0].toUpperCase()
 
-    return `on${eventName[0].toUpperCase() + newEventName.join('')}={${handler}}`;
-}
-
-
-function convertInlineStyles(html) {
-    const style = [html.matchAll(/style\s *=\s * (['"])(.*?)\1/gm)];
-    style.map((_m, _g1, g2) => {
-        html = html.replaceAll(g2, parse(g2));
-    });
-
-    return html;
+    return `on${newEventName}${eventName.slice(3)}={${handler}}`
 }
 
 export function closeSelfClosingTags(html: string): string {
@@ -93,7 +81,7 @@ export function imageFix(html: string): string {
 }
 
 export function removeInvalidTags(html: string): string {
-    return html.replace(/<!DOCTYPE html>/gi, '');
+    return html.replace(/<!DOCTYPE html>|<!DOCTYPE>/gi, '');
 }
 
 export function removeUnsuportedAttrs(html: string): string {
@@ -101,14 +89,13 @@ export function removeUnsuportedAttrs(html: string): string {
 }
 
 export default function convert(html: string): string {
-    html = wrapIntoDiv(html);
     html = removeInvalidTags(html);
+    html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
     html = convertEventAttributesToCamelCase(html);
     html = convertClassToClassName(html);
     html = removeComments(html);
     html = imageFix(html);
-    html = convertInlineStyles(html);
     html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
 
