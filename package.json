@@ -1,12 +1,14 @@
 {
-  "version": "1.1.7",
+  "version": "1.2.1",
   "name": "node-html-to-jsx",
   "description": "The HTML to JSX Converter is a Node.js module that seamlessly transforms HTML markup into JSX syntax, ideal for React projects. ",
   "main": "index.js",
   "type": "module",
+  "sourceType": "module",
   "types": "index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "browserify src/main.js -o dist/bundle.js -t [ babelify --presets [ @babel/preset-env ] ]"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   ],
   "author": "Diogo Angelim",
   "license": "MIT",
+  "funding": "https://www.paypal.com/donate/?hosted_button_id=XA5LN4XR39PMQ",
   "bugs": {
     "url": "https://github.com/DiogoAngelim/html-to-jsx/issues"
   },
@@ -29,5 +32,10 @@
     "beautify": "^0.0.8",
     "css-to-object": "^1.1.0",
     "style-to-object": "^1.0.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-env": "^7.25.8",
+    "babelify": "^10.0.0"
   }
 }

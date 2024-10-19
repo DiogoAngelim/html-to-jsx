@@ -71,6 +71,9 @@ export function imageFix(html) {
 export function removeInvalidTags(html) {
     return html.replace(/<!DOCTYPE html>/gi, '');
 }
+export function removeUnsuportedAttrs(html) {
+    return html.replaceAll('xmlns:xlink="http://www.w3.org/1999/xlink"', '');
+}
 export default function convert(html) {
     html = wrapIntoDiv(html);
     html = removeInvalidTags(html);
@@ -81,5 +84,6 @@ export default function convert(html) {
     html = imageFix(html);
     html = convertInlineStyles(html);
     html = convertStyleToObject(html);
+    html = removeUnsuportedAttrs(html);
     return indentAllLines(html);
 }

@@ -38,6 +38,10 @@ try {
 }
 ```
 
+### Demo
+
+See [DEMO](https://diogoangelim.github.io/html-to-jsx-demo/)
+
 ### Note
 
 This library is primarily designed for manipulating HTML strings in JavaScript environments, particularly for use with frameworks like React.

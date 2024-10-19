@@ -96,6 +96,10 @@ export function removeInvalidTags(html: string): string {
     return html.replace(/<!DOCTYPE html>/gi, '');
 }
 
+export function removeUnsuportedAttrs(html: string): string {
+    return html.replaceAll('xmlns:xlink="http://www.w3.org/1999/xlink"', '');
+}
+
 export default function convert(html: string): string {
     html = wrapIntoDiv(html);
     html = removeInvalidTags(html);
@@ -106,6 +110,7 @@ export default function convert(html: string): string {
     html = imageFix(html);
     html = convertInlineStyles(html);
     html = convertStyleToObject(html);
+    html = removeUnsuportedAttrs(html);
 
     return indentAllLines(html);
 }
