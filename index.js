@@ -42,13 +42,11 @@ export function toCamelCase(string) {
         .join('');
 }
 export function convertInlineStylesToReactStyles(html) {
-  // Create a DOM element to use for parsing the HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
 
-  // Recursively process each element to convert styles
   function processElement(element) {
-    if (element.nodeType === 1) { // Check if the node is an element
+    if (element.nodeType === 1) { 
       const style = element.getAttribute('style');
       if (style) {
         element.style.cssText = style;
@@ -58,9 +56,7 @@ export function convertInlineStylesToReactStyles(html) {
           const camelCaseProperty = propertyName.replace(/-([a-z])/g, g => g[1].toUpperCase());
           reactStyleObject[camelCaseProperty] = element.style.getPropertyValue(propertyName);
         }
-        // Set the new React style as a JSON object
-        element.setAttribute('data-react-style', JSON.stringify(reactStyleObject));
-        element.removeAttribute('style'); // Optionally remove original style
+        element.setAttribute('style', JSON.stringify(reactStyleObject));
       }
     }
 
@@ -74,7 +70,7 @@ export function convertInlineStylesToReactStyles(html) {
   processElement(tempDiv);
 
   // Return the updated HTML
-  return tempDiv.innerHTML;
+  return tempDiv.innerHTML.replace(/style="(.*?)"/gm, 'style={$1}').replace(/&quot;/g, '"');
 }
 export function imageFix(html) {
     return html.replaceAll('</img>', '');
@@ -88,12 +84,12 @@ export function removeUnsuportedAttrs(html) {
 export default function convert(html) {
     html = wrapIntoDiv(html);
     html = removeInvalidTags(html);
-    html = closeSelfClosingTags(html);
     html = convertEventAttributesToCamelCase(html);
     html = convertClassToClassName(html);
     html = removeComments(html);
     html = imageFix(html);
     html = convertInlineStylesToReactStyles(html);
     html = removeUnsuportedAttrs(html);
+    html = closeSelfClosingTags(html);
     return indentAllLines(html);
 }

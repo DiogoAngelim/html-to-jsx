@@ -1,5 +1,5 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.6",
   "name": "node-html-to-jsx",
   "description": "The HTML to JSX Converter is a Node.js module that seamlessly transforms HTML markup into JSX syntax, ideal for React projects. ",
   "main": "index.js",
@@ -29,9 +29,7 @@
   },
   "homepage": "https://github.com/DiogoAngelim/html-to-jsx#readme",
   "dependencies": {
-    "beautify": "^0.0.8",
-    "css-to-object": "^1.1.0",
-    "style-to-object": "^1.0.7"
+    "beautify": "^0.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",

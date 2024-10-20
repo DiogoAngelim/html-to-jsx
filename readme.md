@@ -22,22 +22,6 @@ Then, you can use the convert function to transform your HTML code:
 const convertedHTML = convert('<div><p class="paragraph">Hello, world!</p></div>');
 ```
 
-### Error Handling
-
-The library throws TypeError if the input is not a string, and an Error object if the HTML structure is invalid.
-
-```JavaScript
-const html = '<div><p class="paragraph">Hello, world!</p></div>';
-
-try {
-    const convertedHTML = convert(html);
-
-    console.log(convertedHTML);
-} catch (error) {
-    console.error(error.message);
-}
-```
-
 ### Demo
 
 See [DEMO](https://diogoangelim.github.io/html-to-jsx-demo/)
