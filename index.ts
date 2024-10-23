@@ -88,6 +88,15 @@ export function removeUnsuportedAttrs(html: string): string {
     return html.replaceAll('xmlns:xlink="http://www.w3.org/1999/xlink"', '');
 }
 
+export function replaceAttributes(html: string): string {
+    html = html.replace(/\b($for)\b/gi, 'htmlFor');
+    html = html.replace(/\b($autocomplete)\b/gi, 'autoComplete');
+    html = html.replace(/\b($tabindex)\b/ig, 'tabIndex');
+    html = html.replace(/\b($stroke-width)\b/ig, 'strokeWidth');
+    html = html.replace(/\b($stroke-line-join)\b/ig, 'strokeLinejoin');
+    return html.replace(/\b($strokeLineCap)\b/ig, 'strokeLinecap');
+}
+
 export default function convert(html: string): string {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
