@@ -89,12 +89,12 @@ export function removeUnsuportedAttrs(html: string): string {
 }
 
 export function replaceAttributes(html: string): string {
-    html = html.replace(/\b($for)\b/gi, 'htmlFor');
-    html = html.replace(/\b($autocomplete)\b/gi, 'autoComplete');
-    html = html.replace(/\b($tabindex)\b/ig, 'tabIndex');
-    html = html.replace(/\b($stroke-width)\b/ig, 'strokeWidth');
-    html = html.replace(/\b($stroke-line-join)\b/ig, 'strokeLinejoin');
-    return html.replace(/\b($strokeLineCap)\b/ig, 'strokeLinecap');
+    html = html.replace(/\b(for)\b/gi, 'htmlFor');
+    html = html.replace(/\b(autocomplete)\b/gi, 'autoComplete');
+    html = html.replace(/\b(tabindex)\b/ig, 'tabIndex');
+    html = html.replace(/\b(stroke-width)\b/ig, 'strokeWidth');
+    html = html.replace(/\b(stroke-linejoin)\b/ig, 'strokeLinejoin');
+    return html.replace(/\b(stroke-linecap)\b/ig, 'strokeLinecap');
 }
 
 export default function convert(html: string): string {
