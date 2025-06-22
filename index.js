@@ -26,14 +26,6 @@ export function removeComments(html) {
 export function indentAllLines(html) {
     return beautify(html, { format: 'html' });
 }
-const isTagClosed = (tag) => {
-    return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
-};
-const validateTag = (tag) => {
-    if (!isTagClosed(tag)) {
-        throw new Error(`Tag <${tag}> is not closed.`);
-    }
-};
 export function toCamelCase(string) {
     return string
         .split(/[-_\s]/)
@@ -42,37 +34,38 @@ export function toCamelCase(string) {
         : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join('');
 }
+
+function parseStyleString(style) {
+    const entries = style.split(';').filter(Boolean).map(rule => {
+      const [key, value] = rule.split(':');
+      if (!key || !value) return null;
+  
+      const camelKey = key.trim().replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+      return [camelKey, value.trim()];
+    }).filter(Boolean);
+  
+    const styleObject = Object.fromEntries(entries);
+  
+    return JSON.stringify(styleObject).replace(/"([^"]+)":/g, '$1:'); // Strip object keys' quotes
+  } 
 export function convertInlineStylesToReactStyles(html) {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-
-  function processElement(element) {
-    if (element.nodeType === 1) { 
-      const style = element.getAttribute('style');
-      if (style) {
-        element.style.cssText = style;
-        const reactStyleObject = {};
-        for (let i = 0; i < element.style.length; i++) {
-          const propertyName = element.style[i];
-          const camelCaseProperty = propertyName.replace(/-([a-z])/g, g => g[1].toUpperCase());
-          reactStyleObject[camelCaseProperty] = element.style.getPropertyValue(propertyName);
-        }
-        element.setAttribute('style', JSON.stringify(reactStyleObject));
+  return html.replace(/style="(.*?)"/g, (_match, style) => {
+    const reactStyleObject = {};
+    style.split(';').forEach(styleRule => {
+      if (styleRule.trim()) {
+        const [property, value] = styleRule.split(':').map(s => s.trim());
+        const camelCaseProperty = property.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        reactStyleObject[camelCaseProperty] = value;
       }
-    }
+    });
 
-    // Process child elements recursively
-    for (let child of element.children) {
-      processElement(child);
-    }
-  }
-
-  // Process the root element
-  processElement(tempDiv);
-
-  // Return the updated HTML
-  return tempDiv.innerHTML.replace(/style="(.*?)"/gm, 'style={$1}').replace(/&quot;/g, '"');
+    return `style={${JSON.stringify(reactStyleObject)}}`;
+  }).replace(/style="([^"]+)"/g, (_, styleString) => {
+    const styleObj = parseStyleString(styleString);
+    return `style={${styleObj}}`;
+  });
 }
+
 export function imageFix(html) {
     return html.replaceAll('</img>', '');
 }
@@ -95,7 +88,7 @@ export default function convert(html) {
     html = removeInvalidTags(html);
     html = removeComments(html);
     html = imageFix(html);
-    html = convertInlineStylesToReactStyles(html);
+    // html = convertInlineStylesToReactStyles(html);
     html = removeUnsuportedAttrs(html);
     html = closeSelfClosingTags(html);
     html = convertClassToClassName(html);
