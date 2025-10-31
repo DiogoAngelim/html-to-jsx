@@ -4,7 +4,8 @@ import {
   convertClassToClassName,
   removeComments,
   validateHtml,
-  convertInlineStyles
+  convertInlineStyles,
+  replaceAttributes
 } from '../index.js';
 
 describe('HTML to JSX Converter Tests', () => {
@@ -108,6 +109,44 @@ describe('HTML to JSX Converter Tests', () => {
     it('should handle self-closing tags without closing slash', () => {
       const html = '<input><br>';
       expect(validateHtml(html)).toBe('HTML is valid.');
+    });
+  });
+
+  describe('replaceAttributes', () => {
+    it('should convert for= attributes to htmlFor= correctly', () => {
+      const html = '<label for="username">Username</label>';
+      const expected = '<label htmlFor="username">Username</label>';
+      expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should handle mixed case for attributes', () => {
+      const html = '<label FOR="email">Email</label>';
+      const expected = '<label htmlFor="email">Email</label>';
+      expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should NOT replace text containing "for"', () => {
+      const html = '<p>This is for testing purposes only</p>';
+      const expected = '<p>This is for testing purposes only</p>';
+      expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should handle multiple for attributes', () => {
+      const html = '<label for="input1">Label 1</label><label for="input2">Label 2</label>';
+      const expected = '<label htmlFor="input1">Label 1</label><label htmlFor="input2">Label 2</label>';
+      expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should handle other attribute conversions', () => {
+      const html = '<input autocomplete="off" tabindex="1">';
+      const expected = '<input autoComplete="off" tabIndex="1">';
+      expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should handle empty input', () => {
+      const html = '';
+      const expected = '';
+      expect(replaceAttributes(html)).toBe(expected);
     });
   });
 });

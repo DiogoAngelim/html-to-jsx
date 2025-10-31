@@ -89,7 +89,7 @@ export function removeUnsuportedAttrs(html: string): string {
 }
 
 export function replaceAttributes(html: string): string {
-    html = html.replace(/\b(for)\b/gi, 'htmlFor');
+    html = html.replace(/for=/gi, 'htmlFor=');
     html = html.replace(/\b(autocomplete)\b/gi, 'autoComplete');
     html = html.replace(/\b(tabindex)\b/ig, 'tabIndex');
     html = html.replace(/\b(stroke-width)\b/ig, 'strokeWidth');
