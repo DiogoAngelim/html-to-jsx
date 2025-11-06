@@ -1,36 +1,51 @@
 import beautify from 'beautify';
-import cssToObject from 'css-to-object';
 
-const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
-const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
+const selfClosingTags: string[] = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
+const tagsRequiringClosing = new Set<string>(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
 
 export function wrapIntoDiv(html: string): string {
     return `<div>${html}</div>`;
 }
 
-const eventAttributesCallback = (_match: any, eventName: string, handler: string): string => {
-    let newEventName = eventName.slice(2).split('')[0].toUpperCase()
+function cssToObject(cssString: string): string {
+    const cleanCss = cssString.replace(/['"]/g, '').trim();
 
-    return `on${newEventName}${eventName.slice(3)}={${handler}}`
+    if (!cleanCss) return '{}';
+
+    const styles = cleanCss.split(';')
+        .filter((style: string) => style.trim())
+        .map((style: string) => {
+            const [property, value] = style.split(':').map((s: string) => s.trim());
+            if (!property || !value) return '';
+
+            const camelProperty = property.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+
+            return `${camelProperty}: "${value}"`;
+        })
+        .filter(Boolean);
+
+    return `{${styles.join(', ')}}`;
+}
+
+const eventAttributesCallback = (_match: string, eventName: string, handler: string): string => {
+    const newEventName: string = eventName.slice(2).split('')[0].toUpperCase();
+
+    return `on${newEventName}${eventName.slice(3)}={${handler}}`;
 }
 
 export function closeSelfClosingTags(html: string): string {
-    // Fix: Prevent partial tag name matches
-    // e.g., "col" should not match "colgroup", "input" should not match "inputmode", etc.
-    // Pattern ensures tag name is immediately followed by whitespace, >, or /
-    // This prevents matching "col" in "colgroup" since "colgroup" has "g" (a letter) after "col"
     const result = html.replaceAll(
-      new RegExp(
-        `<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`,
-        "gi",
-      ),
-      (_match: string, tagName: string, attributes: string) =>
-        `<${tagName}${attributes ? attributes : ""}/>`,
+        new RegExp(
+            `<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`,
+            "gi",
+        ),
+        (_match: string, tagName: string, attributes: string) =>
+            `<${tagName}${attributes ? attributes : ""}/>`,
     );
-  
+
     return result.replace(/\/\/>/g, "/>");
-  }
-  
+}
+
 export function convertEventAttributesToCamelCase(html: string): string {
     return html.replaceAll(/(\bon\w+)=["']([^"']+)["']/g, eventAttributesCallback);
 }
@@ -64,9 +79,10 @@ const validateTag = (tag: string): void => {
 }
 
 const validateTags = (html: string): void => {
-    let match: any;
+    let match: RegExpExecArray | null;
+    const regex = /<([^\s>\/]+)/g;
 
-    while ((match = /<([^\s>\/]+)/g.exec(html)) !== null) {
+    while ((match = regex.exec(html)) !== null) {
         validateTag(match[1].toLowerCase());
     }
 }
@@ -84,9 +100,9 @@ export function toCamelCase(string: string): string {
 
 
 export function convertStyleToObject(html: string): string {
-    return html.replaceAll(/style = (".*?")/gi, (match) => {
-        return `style={${cssToObject(match[1])}}`
-    })
+    return html.replaceAll(/style\s*=\s*(".*?")/gi, (match: string, styleValue: string) => {
+        return `style={${cssToObject(styleValue)}}`;
+    });
 }
 
 export function imageFix(html: string): string {
@@ -120,6 +136,7 @@ export default function convert(html: string): string {
     html = imageFix(html);
     html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
+    html = replaceAttributes(html);
 
     return indentAllLines(html);
 }
