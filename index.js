@@ -1,98 +1,112 @@
-import beautify from 'beautify';
-
-const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
-const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
-export function wrapIntoDiv(html) {
-    return `<div>${html}</div>`;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.replaceAttributes = exports.removeUnsuportedAttrs = exports.removeInvalidTags = exports.imageFix = exports.convertStyleToObject = exports.toCamelCase = exports.indentAllLines = exports.removeComments = exports.convertClassToClassName = exports.convertEventAttributesToCamelCase = exports.closeSelfClosingTags = exports.wrapIntoDiv = void 0;
+var beautify_1 = require("beautify");
+var css_to_object_1 = require("css-to-object");
+var selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
+var tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
+function wrapIntoDiv(html) {
+    return "<div>".concat(html, "</div>");
 }
-const eventAttributesCallback = (_match, eventName, handler) => {
-    const eventPart = eventName.slice(2);
-    console.log(eventPart);
-    
-    return `on${eventPart.charAt(0).toUpperCase()}${eventPart.slice(1)}={${handler}}`;
+exports.wrapIntoDiv = wrapIntoDiv;
+var eventAttributesCallback = function (_match, eventName, handler) {
+    var newEventName = eventName.slice(2).split('')[0].toUpperCase();
+    return "on".concat(newEventName).concat(eventName.slice(3), "={").concat(handler, "}");
 };
-export function closeSelfClosingTags(html) {
-    return html.replaceAll(new RegExp(`<(${selfClosingTags.join('|')})([^>]*)\s*/?>`, 'gi'), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ''}/>`).replace(/\/\/>/g, '/>');
+function closeSelfClosingTags(html) {
+    // Fix: Prevent partial tag name matches
+    // e.g., "col" should not match "colgroup", "input" should not match "inputmode", etc.
+    // Pattern ensures tag name is immediately followed by whitespace, >, or /
+    // This prevents matching "col" in "colgroup" since "colgroup" has "g" (a letter) after "col"
+    var result = html.replaceAll(new RegExp("<(".concat(selfClosingTags.join("|"), ")(?=[\\s>/])([^>]*)\\s*/?>"), "gi"), function (_match, tagName, attributes) {
+        return "<".concat(tagName).concat(attributes ? attributes : "", "/>");
+    });
+    return result.replace(/\/\/>/g, "/>");
 }
-export function convertEventAttributesToCamelCase(html) {
+exports.closeSelfClosingTags = closeSelfClosingTags;
+function convertEventAttributesToCamelCase(html) {
     return html.replaceAll(/(\bon\w+)=["']([^"']+)["']/g, eventAttributesCallback);
 }
-export function convertClassToClassName(html) {
+exports.convertEventAttributesToCamelCase = convertEventAttributesToCamelCase;
+function convertClassToClassName(html) {
     return html.replaceAll(/class=/g, 'className=');
 }
-export function removeComments(html) {
+exports.convertClassToClassName = convertClassToClassName;
+function removeComments(html) {
     return html.replaceAll(/<!--[\s\S]*?-->/g, '');
 }
-export function indentAllLines(html) {
-    return beautify(html, { format: 'html' });
+exports.removeComments = removeComments;
+function indentAllLines(html) {
+    return (0, beautify_1.default)(html, { format: 'html' });
 }
-export function toCamelCase(string) {
+exports.indentAllLines = indentAllLines;
+var isTagClosed = function (tag) {
+    return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
+};
+var validateInput = function (html) {
+    if (typeof html !== 'string' || html.trim() === '' || !html) {
+        throw new TypeError('Input must be valid a string.');
+    }
+};
+var validateTag = function (tag) {
+    if (!isTagClosed(tag)) {
+        throw new Error("Tag <".concat(tag, "> is not closed."));
+    }
+};
+var validateTags = function (html) {
+    var match;
+    while ((match = /<([^\s>\/]+)/g.exec(html)) !== null) {
+        validateTag(match[1].toLowerCase());
+    }
+};
+function toCamelCase(string) {
     return string
         .split(/[-_\s]/)
-        .map((word, index) => index === 0
-        ? word.toLowerCase()
-        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map(function (word, index) {
+        return index === 0
+            ? word.toLowerCase()
+            : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
         .join('');
 }
-
-function parseStyleString(style) {
-    const entries = style.split(';').filter(Boolean).map(rule => {
-      const [key, value] = rule.split(':');
-      if (!key || !value) return null;
-  
-      const camelKey = key.trim().replace(/-([a-z])/g, (_, char) => char.toUpperCase());
-      return [camelKey, value.trim()];
-    }).filter(Boolean);
-  
-    const styleObject = Object.fromEntries(entries);
-  
-    return JSON.stringify(styleObject).replace(/"([^"]+)":/g, '$1:'); // Strip object keys' quotes
-  } 
-export function convertInlineStylesToReactStyles(html) {
-  return html.replace(/style="(.*?)"/g, (_match, style) => {
-    const reactStyleObject = {};
-    style.split(';').forEach(styleRule => {
-      if (styleRule.trim()) {
-        const [property, value] = styleRule.split(':').map(s => s.trim());
-        const camelCaseProperty = property.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        reactStyleObject[camelCaseProperty] = value;
-      }
+exports.toCamelCase = toCamelCase;
+function convertStyleToObject(html) {
+    return html.replaceAll(/style = (".*?")/gi, function (match) {
+        return "style={".concat((0, css_to_object_1.default)(match[1]), "}");
     });
-
-    return `style={${JSON.stringify(reactStyleObject)}}`;
-  }).replace(/style="([^"]+)"/g, (_, styleString) => {
-    const styleObj = parseStyleString(styleString);
-    return `style={${styleObj}}`;
-  });
 }
-
-export function imageFix(html) {
+exports.convertStyleToObject = convertStyleToObject;
+function imageFix(html) {
     return html.replaceAll('</img>', '');
 }
-export function removeInvalidTags(html) {
-    return html.replace(/<!DOCTYPE html>/gi, '');
+exports.imageFix = imageFix;
+function removeInvalidTags(html) {
+    return html.replace(/<!DOCTYPE html>|<!DOCTYPE>/gi, '');
 }
-export function removeUnsuportedAttrs(html) {
+exports.removeInvalidTags = removeInvalidTags;
+function removeUnsuportedAttrs(html) {
     return html.replaceAll('xmlns:xlink="http://www.w3.org/1999/xlink"', '');
 }
-export function replaceAttributes(html) {
+exports.removeUnsuportedAttrs = removeUnsuportedAttrs;
+function replaceAttributes(html) {
     html = html.replace(/\b(for)\b/gi, 'htmlFor');
     html = html.replace(/\b(autocomplete)\b/gi, 'autoComplete');
     html = html.replace(/\b(tabindex)\b/ig, 'tabIndex');
     html = html.replace(/\b(stroke-width)\b/ig, 'strokeWidth');
     html = html.replace(/\b(stroke-linejoin)\b/ig, 'strokeLinejoin');
-    return html.replace(/\b(stroke-linecap)\b/ig, 'strokeLinecap');	
+    return html.replace(/\b(stroke-linecap)\b/ig, 'strokeLinecap');
 }
-export default function convert(html) {
-    html = wrapIntoDiv(html);
+exports.replaceAttributes = replaceAttributes;
+function convert(html) {
     html = removeInvalidTags(html);
+    html = wrapIntoDiv(html);
+    html = closeSelfClosingTags(html);
+    html = convertEventAttributesToCamelCase(html);
+    html = convertClassToClassName(html);
     html = removeComments(html);
     html = imageFix(html);
-    // html = convertInlineStylesToReactStyles(html);
+    html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
-    html = closeSelfClosingTags(html);
-    html = convertClassToClassName(html);
-    html = convertEventAttributesToCamelCase(html);
-    html = replaceAttributes(html);
     return indentAllLines(html);
 }
+exports.default = convert;
