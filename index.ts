@@ -15,9 +15,22 @@ const eventAttributesCallback = (_match: any, eventName: string, handler: string
 }
 
 export function closeSelfClosingTags(html: string): string {
-    return html.replaceAll(new RegExp(`<(${selfClosingTags.join('|')})([^>]*)\s*/?>`, 'gi'), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ''}/>`).replace(/\/\/>/g, '/>');
-}
-
+    // Fix: Prevent partial tag name matches
+    // e.g., "col" should not match "colgroup", "input" should not match "inputmode", etc.
+    // Pattern ensures tag name is immediately followed by whitespace, >, or /
+    // This prevents matching "col" in "colgroup" since "colgroup" has "g" (a letter) after "col"
+    const result = html.replaceAll(
+      new RegExp(
+        `<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`,
+        "gi",
+      ),
+      (_match: string, tagName: string, attributes: string) =>
+        `<${tagName}${attributes ? attributes : ""}/>`,
+    );
+  
+    return result.replace(/\/\/>/g, "/>");
+  }
+  
 export function convertEventAttributesToCamelCase(html: string): string {
     return html.replaceAll(/(\bon\w+)=["']([^"']+)["']/g, eventAttributesCallback);
 }

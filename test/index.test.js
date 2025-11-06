@@ -25,6 +25,36 @@ describe('HTML to JSX Converter Tests', () => {
     it('should throw TypeError for invalid input', () => {
       expect(() => closeSelfClosingTags(123)).toThrow(TypeError);
     });
+
+    it('should not match partial tag names - colgroup should not match col', () => {
+      const html = '<colgroup><col>';
+      const expected = '<colgroup><col/>';
+      expect(closeSelfClosingTags(html)).toBe(expected);
+    });
+
+    it('should not match partial tag names - inputmode should not match input', () => {
+      const html = '<div inputmode="numeric"><input>';
+      const expected = '<div inputmode="numeric"><input/>';
+      expect(closeSelfClosingTags(html)).toBe(expected);
+    });
+
+    it('should correctly handle col tag with attributes', () => {
+      const html = '<col span="2" style="width: 50%">';
+      const expected = '<col span="2" style="width: 50%"/>';
+      expect(closeSelfClosingTags(html)).toBe(expected);
+    });
+
+    it('should correctly handle colgroup with nested col tags', () => {
+      const html = '<colgroup><col span="2"><col></colgroup>';
+      const expected = '<colgroup><col span="2"/><col/></colgroup>';
+      expect(closeSelfClosingTags(html)).toBe(expected);
+    });
+
+    it('should handle self-closing tags with attributes', () => {
+      const html = '<input type="text" name="username"><img src="image.jpg" alt="test">';
+      const expected = '<input type="text" name="username"/><img src="image.jpg" alt="test"/>';
+      expect(closeSelfClosingTags(html)).toBe(expected);
+    });
   });
 
   describe('convertEventAttributesToCamelCase', () => {
