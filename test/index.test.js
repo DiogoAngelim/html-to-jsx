@@ -4,7 +4,7 @@ import {
   convertClassToClassName,
   removeComments,
   validateHtml,
-  convertInlineStyles,
+  convertStyleToObject,
   replaceAttributes
 } from '../index.js';
 

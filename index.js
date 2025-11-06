@@ -90,6 +90,40 @@ export function replaceAttributes(html) {
     html = html.replace(/\b(stroke-linejoin)\b/ig, 'strokeLinejoin');
     return html.replace(/\b(stroke-linecap)\b/ig, 'strokeLinecap');
 }
+export function validateHtml(html) {
+    if (typeof html !== 'string') {
+        throw new TypeError('Input must be a string.');
+    }
+    if (html.trim() === '') {
+        return 'HTML is valid.';
+    }
+    const tagStack = [];
+    const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+    let match;
+    while ((match = tagRegex.exec(html)) !== null) {
+        const fullTag = match[0];
+        const tagName = match[1].toLowerCase();
+        if (fullTag.endsWith('/>') || selfClosingTags.includes(tagName)) {
+            continue;
+        }
+        if (fullTag.startsWith('</')) {
+            if (tagStack.length === 0) {
+                throw new Error(`Unexpected closing tag: ${fullTag}`);
+            }
+            const lastOpenTag = tagStack.pop();
+            if (lastOpenTag !== tagName) {
+                throw new Error(`Mismatched tags: expected </${lastOpenTag}> but found </${tagName}>`);
+            }
+        }
+        else {
+            tagStack.push(tagName);
+        }
+    }
+    if (tagStack.length > 0) {
+        throw new Error(`Unclosed tags: ${tagStack.map(tag => `<${tag}>`).join(', ')}`);
+    }
+    return 'HTML is valid.';
+}
 export default function convert(html) {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
