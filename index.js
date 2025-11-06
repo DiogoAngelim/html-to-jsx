@@ -4,11 +4,7 @@ const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4'
 export function wrapIntoDiv(html) {
     return `<div>${html}</div>`;
 }
-/**
- * Convert CSS string to JavaScript object notation
- */
 function cssToObject(cssString) {
-    // Remove quotes and clean up the CSS string
     const cleanCss = cssString.replace(/['"]/g, '').trim();
     if (!cleanCss)
         return '{}';
@@ -18,7 +14,6 @@ function cssToObject(cssString) {
         const [property, value] = style.split(':').map((s) => s.trim());
         if (!property || !value)
             return '';
-        // Convert kebab-case to camelCase
         const camelProperty = property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
         return `${camelProperty}: "${value}"`;
     })
@@ -30,10 +25,6 @@ const eventAttributesCallback = (_match, eventName, handler) => {
     return `on${newEventName}${eventName.slice(3)}={${handler}}`;
 };
 export function closeSelfClosingTags(html) {
-    // Fix: Prevent partial tag name matches
-    // e.g., "col" should not match "colgroup", "input" should not match "inputmode", etc.
-    // Pattern ensures tag name is immediately followed by whitespace, >, or /
-    // This prevents matching "col" in "colgroup" since "colgroup" has "g" (a letter) after "col"
     const result = html.replaceAll(new RegExp(`<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`, "gi"), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ""}/>`);
     return result.replace(/\/\/>/g, "/>");
 }
@@ -98,6 +89,47 @@ export function replaceAttributes(html) {
     html = html.replace(/\b(stroke-width)\b/ig, 'strokeWidth');
     html = html.replace(/\b(stroke-linejoin)\b/ig, 'strokeLinejoin');
     return html.replace(/\b(stroke-linecap)\b/ig, 'strokeLinecap');
+}
+
+export function validateHtml(html) {
+    if (typeof html !== 'string') {
+        throw new TypeError('Input must be a string.');
+    }
+    
+    if (html.trim() === '') {
+        return 'HTML is valid.';
+    }
+    
+    const tagStack = [];
+    const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+    let match;
+    
+    while ((match = tagRegex.exec(html)) !== null) {
+        const fullTag = match[0];
+        const tagName = match[1].toLowerCase();
+        
+        if (fullTag.endsWith('/>') || selfClosingTags.includes(tagName)) {
+            continue;
+        }
+        
+        if (fullTag.startsWith('</')) {
+            if (tagStack.length === 0) {
+                throw new Error(`Unexpected closing tag: ${fullTag}`);
+            }
+            const lastOpenTag = tagStack.pop();
+            if (lastOpenTag !== tagName) {
+                throw new Error(`Mismatched tags: expected </${lastOpenTag}> but found </${tagName}>`);
+            }
+        } else {
+            tagStack.push(tagName);
+        }
+    }
+    
+    if (tagStack.length > 0) {
+        throw new Error(`Unclosed tags: ${tagStack.map(tag => `<${tag}>`).join(', ')}`);
+    }
+    
+    return 'HTML is valid.';
 }
 export default function convert(html) {
     html = removeInvalidTags(html);
