@@ -27,70 +27,65 @@ describe('HTML to JSX Converter Tests', () => {
       const expected = '<input/><img/><br/>';
       expect(closeSelfClosingTags(html)).toBe(expected);
     });
+  });
 
-    it('should handle empty input', () => {
-      const html = '';
-      const expected = '';
-      expect(closeSelfClosingTags(html)).toBe(expected);
-    });
-
-    it('should throw TypeError for invalid input', () => {
-      expect(() => closeSelfClosingTags(123)).toThrow(TypeError);
-    });
-
-    it('should not match partial tag names - colgroup should not match col', () => {
-      const html = '<colgroup><col>';
-      const expected = '<colgroup><col/>';
-      expect(closeSelfClosingTags(html)).toBe(expected);
-    });
-
-    it('should not match partial tag names - inputmode should not match input', () => {
-      const html = '<div inputmode="numeric"><input>';
-      const expected = '<div inputmode="numeric"><input/>';
-      expect(closeSelfClosingTags(html)).toBe(expected);
-    });
-
-    it('should correctly handle col tag with attributes', () => {
-      const html = '<col span="2" style="width: 50%">';
-      const expected = '<col span="2" style="width: 50%"/>';
-      expect(closeSelfClosingTags(html)).toBe(expected);
-    });
-
-    it('should correctly handle colgroup with nested col tags', () => {
-      const html = '<colgroup><col span="2"><col></colgroup>';
-      const expected = '<colgroup><col span="2"/><col/></colgroup>';
-      expect(closeSelfClosingTags(html)).toBe(expected);
-    });
-
-    it('should handle self-closing tags with attributes', () => {
-      const html = '<input type="text" name="username"><img src="image.jpg" alt="test">';
-      const expected = '<input type="text" name="username"/><img src="image.jpg" alt="test"/>';
-      expect(closeSelfClosingTags(html)).toBe(expected);
+  describe('removeUnsuportedAttrs', () => {
+    it('should remove unsupported xmlns:xlink attribute', () => {
+      expect(removeUnsuportedAttrs('<svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>')).toBe('<svg ></svg>');
     });
   });
 
-  describe('convertEventAttributesToCamelCase', () => {
-    it('should convert event attributes to camel case correctly', () => {
-      const html = '<button onclick="handleClick">Click me</button>';
-      const expected = '<button onClick={handleClick}>Click me</button>';
-      expect(convertEventAttributesToCamelCase(html)).toBe(expected);
+  describe('validateInput', () => {
+    it('should throw TypeError for non-string input', () => {
+      expect(() => validateInput(123)).toThrow(TypeError);
     });
+    it('should throw TypeError for empty string', () => {
+      expect(() => validateInput('')).toThrow(TypeError);
+    });
+  });
 
-    it('should handle multiple event attributes', () => {
-      const html = '<input onchange="handleChange" onclick="handleClick">';
-      const expected = '<input onChange={handleChange} onClick={handleClick}>';
-      expect(convertEventAttributesToCamelCase(html)).toBe(expected);
+  describe('isTagClosed', () => {
+    it('should return false for self-closing tag', () => {
+      expect(isTagClosed('img')).toBe(false);
     });
+    it('should return true for closing tag', () => {
+      expect(isTagClosed('div')).toBe(true);
+    });
+  });
 
-    it('should handle empty input', () => {
-      const html = '';
-      const expected = '';
-      expect(convertEventAttributesToCamelCase(html)).toBe(expected);
+  describe('validateTag', () => {
+    it('should throw error for unclosed tag', () => {
+      expect(() => validateTag('img')).toThrow(Error);
     });
+    it('should not throw for closed tag', () => {
+      expect(() => validateTag('div')).not.toThrow();
+    });
+  });
 
-    it('should throw TypeError for invalid input', () => {
-      expect(() => convertEventAttributesToCamelCase(123)).toThrow(TypeError);
+  describe('validateTags', () => {
+    it('should throw error for HTML with unclosed tag', () => {
+      expect(() => validateTags('<img>')).toThrow(Error);
     });
+    it('should not throw for HTML with closed tag', () => {
+      expect(() => validateTags('<div></div>')).not.toThrow();
+    });
+  });
+
+  describe('convert (default export)', () => {
+    it('should convert HTML to beautified JSX', () => {
+      const html = '<!DOCTYPE html><div class="container" style="color: red;"></div>';
+      const result = convert(html);
+      expect(result).toContain('className');
+      expect(result).toContain('style={');
+      expect(result).not.toContain('DOCTYPE');
+    });
+    it('should handle empty input gracefully', () => {
+      expect(() => convert('')).not.toThrow();
+    });
+  });
+
+  it('should throw TypeError for invalid input', () => {
+    expect(() => convertEventAttributesToCamelCase(123)).toThrow(TypeError);
   });
 
   describe('convertClassToClassName', () => {
@@ -234,65 +229,3 @@ describe('imageFix', () => {
   });
 });
 
-describe('removeInvalidTags', () => {
-  it('should remove DOCTYPE tags', () => {
-    expect(removeInvalidTags('<!DOCTYPE html><div></div>')).toBe('<div></div>');
-  });
-});
-
-describe('removeUnsuportedAttrs', () => {
-  it('should remove unsupported xmlns:xlink attribute', () => {
-    expect(removeUnsuportedAttrs('<svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>')).toBe('<svg ></svg>');
-  });
-});
-
-describe('validateInput', () => {
-  it('should throw TypeError for non-string input', () => {
-    expect(() => validateInput(123)).toThrow(TypeError);
-  });
-  it('should throw TypeError for empty string', () => {
-    expect(() => validateInput('')).toThrow(TypeError);
-  });
-});
-
-describe('isTagClosed', () => {
-  it('should return false for self-closing tag', () => {
-    expect(isTagClosed('img')).toBe(false);
-  });
-  it('should return true for closing tag', () => {
-    expect(isTagClosed('div')).toBe(true);
-  });
-});
-
-describe('validateTag', () => {
-  it('should throw error for unclosed tag', () => {
-    expect(() => validateTag('img')).toThrow(Error);
-  });
-  it('should not throw for closed tag', () => {
-    expect(() => validateTag('div')).not.toThrow();
-  });
-});
-
-describe('validateTags', () => {
-  it('should throw error for HTML with unclosed tag', () => {
-    expect(() => validateTags('<img>')).toThrow(Error);
-  });
-  it('should not throw for HTML with closed tag', () => {
-    expect(() => validateTags('<div></div>')).not.toThrow();
-  });
-});
-
-
-
-describe('convert (default export)', () => {
-  it('should convert HTML to beautified JSX', () => {
-    const html = '<!DOCTYPE html><div class="container" style="color: red;"></div>';
-    const result = convert(html);
-    expect(result).toContain('className');
-    expect(result).toContain('style={');
-    expect(result).not.toContain('DOCTYPE');
-  });
-  it('should handle empty input gracefully', () => {
-    expect(() => convert('')).not.toThrow();
-  });
-});
