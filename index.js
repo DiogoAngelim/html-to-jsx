@@ -138,9 +138,5 @@ export default function convert(html) {
     return indentAllLines(html);
 }
 
-// Export internal helpers for testing
-module.exports.cssToObject = cssToObject;
-module.exports.isTagClosed = isTagClosed;
-module.exports.validateInput = validateInput;
-module.exports.validateTag = validateTag;
-module.exports.validateTags = validateTags;
+
+export { cssToObject, isTagClosed, validateInput, validateTag, validateTags };
