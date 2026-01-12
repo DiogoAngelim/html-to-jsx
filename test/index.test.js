@@ -1,3 +1,25 @@
+// 100% coverage targeted tests
+describe('targeted coverage for uncovered lines', () => {
+  it('wrapIntoDiv should handle empty string', () => {
+    expect(wrapIntoDiv('')).toBe('<div></div>'); // line 16
+  });
+
+  it('cssToObject should handle quotes and whitespace', () => {
+    expect(cssToObject('"color: red;"')).toBe('{color: "red"}'); // line 24-25
+  });
+
+  it('closeSelfClosingTags should handle no matches', () => {
+    expect(closeSelfClosingTags('<div></div>')).toBe('<div></div>'); // line 95
+  });
+
+  it('convertEventAttributesToCamelCase should handle no event attributes', () => {
+    expect(convertEventAttributesToCamelCase('<div></div>')).toBe('<div></div>'); // line 111
+  });
+
+  it('convertClassToClassName should handle no class attribute', () => {
+    expect(convertClassToClassName('<div></div>')).toBe('<div></div>'); // line 123
+  });
+});
 import {
   closeSelfClosingTags,
   convertEventAttributesToCamelCase,
