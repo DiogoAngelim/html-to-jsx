@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1768184292868" clover="3.2.0">
-  <project timestamp="1768184292868" name="All files">
+<coverage generated="1768184580856" clover="3.2.0">
+  <project timestamp="1768184580856" name="All files">
     <metrics statements="80" coveredstatements="76" conditionals="35" coveredconditionals="29" methods="28" coveredmethods="27" elements="143" coveredelements="132" complexity="0" loc="80" ncloc="80" packages="1" files="1" classes="1"/>
     <file name="index.js" path="/Users/diogoangelim/html-to-jsx/index.js">
       <metrics statements="80" coveredstatements="76" conditionals="35" coveredconditionals="29" methods="28" coveredmethods="27"/>
