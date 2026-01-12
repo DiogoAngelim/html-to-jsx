@@ -188,6 +188,72 @@ describe('HTML to JSX Converter Tests', () => {
   });
 });
 // Additional coverage tests
+describe('validateInput', () => {
+  it('should throw TypeError for null input', () => {
+    expect(() => validateInput(null)).toThrow(TypeError);
+  });
+  it('should throw TypeError for undefined input', () => {
+    expect(() => validateInput(undefined)).toThrow(TypeError);
+  });
+  it('should throw TypeError for empty string', () => {
+    expect(() => validateInput('')).toThrow(TypeError);
+  });
+  it('should not throw for valid string', () => {
+    expect(() => validateInput('<div></div>')).not.toThrow();
+  });
+});
+
+describe('validateTag', () => {
+  it('should throw Error for self-closing tag', () => {
+    expect(() => validateTag('img')).toThrow(Error);
+  });
+  it('should not throw for closing tag', () => {
+    expect(() => validateTag('div')).not.toThrow();
+  });
+});
+
+describe('validateTags', () => {
+  it('should throw Error for HTML with unclosed tag', () => {
+    expect(() => validateTags('<img>')).toThrow(Error);
+  });
+  it('should not throw for HTML with closed tag', () => {
+    expect(() => validateTags('<div></div>')).not.toThrow();
+  });
+});
+
+describe('replaceAttributes', () => {
+  it('should convert stroke attributes', () => {
+    const html = '<svg stroke-width="2" stroke-linejoin="round" stroke-linecap="square"></svg>';
+    const expected = '<svg strokeWidth="2" strokeLinejoin="round" strokeLinecap="square"></svg>';
+    expect(replaceAttributes(html)).toBe(expected);
+  });
+  it('should not replace unrelated attributes', () => {
+    const html = '<div data-test="value"></div>';
+    expect(replaceAttributes(html)).toBe(html);
+  });
+});
+
+describe('convert (default export)', () => {
+  it('should handle HTML with comments and unsupported attributes', () => {
+    const html = '<!--comment--><svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>';
+    const result = convert(html);
+    expect(result).not.toContain('xmlns:xlink');
+    expect(result).not.toContain('<!--');
+  });
+  it('should handle HTML with multiple attributes', () => {
+    const html = '<label for="id" autocomplete="off" tabindex="1"></label>';
+    const result = convert(html);
+    expect(result).toContain('htmlFor');
+    expect(result).toContain('autoComplete');
+    expect(result).toContain('tabIndex');
+  });
+  it('should handle HTML with style and class', () => {
+    const html = '<div class="x" style="color: blue;"></div>';
+    const result = convert(html);
+    expect(result).toContain('className');
+    expect(result).toContain('style={');
+  });
+});
 describe('wrapIntoDiv', () => {
   it('should wrap HTML into a div', () => {
     expect(wrapIntoDiv('<span>Test</span>')).toBe('<div><span>Test</span></div>');
