@@ -4,7 +4,7 @@ const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4'
 export function wrapIntoDiv(html) {
     return `<div>${html}</div>`;
 }
-function cssToObject(cssString) {
+export function cssToObject(cssString) {
     const cleanCss = cssString.replace(/['"]/g, '').trim();
     if (!cleanCss)
         return '{}';
@@ -139,4 +139,4 @@ export default function convert(html) {
 }
 
 
-export { cssToObject, isTagClosed, validateInput, validateTag, validateTags };
+export { isTagClosed, validateInput, validateTag, validateTags };
