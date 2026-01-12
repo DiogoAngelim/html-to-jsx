@@ -11,8 +11,6 @@ module.exports = {
       tsconfig: 'tsconfig.json',
     },
   },
-  moduleNameMapper: {
-    '^(\.{1,2}/.*)\.js$': '$1',
-  },
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)', '**/?(*.)+(spec|test).mjs'],
+  transformIgnorePatterns: ['/node_modules/'],
 };
