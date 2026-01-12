@@ -20,6 +20,10 @@ export function cssToObject(cssString) {
         .filter(Boolean);
     return `{${styles.join(', ')}}`;
 }
+
+export function imageFix(html) {
+    return html.replace(/<img([^>]*)><\/img>/gi, '<img$1>');
+}
 const eventAttributesCallback = (_match, eventName, handler) => {
     const newEventName = eventName.slice(2).split('')[0].toUpperCase();
     return `on${newEventName}${eventName.slice(3)}={${handler}}`;
@@ -40,26 +44,26 @@ export function removeComments(html) {
 export function indentAllLines(html) {
     return beautify(html, { format: 'html' });
 }
-const isTagClosed = (tag) => {
+export function isTagClosed(tag) {
     return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
-};
-const validateInput = (html) => {
+}
+export function validateInput(html) {
     if (typeof html !== 'string' || html.trim() === '' || !html) {
         throw new TypeError('Input must be valid a string.');
     }
-};
-const validateTag = (tag) => {
+}
+export function validateTag(tag) {
     if (!isTagClosed(tag)) {
         throw new Error(`Tag <${tag}> is not closed.`);
     }
-};
-const validateTags = (html) => {
+}
+export function validateTags(html) {
     let match;
     const regex = /<([^\s>\/]+)/g;
     while ((match = regex.exec(html)) !== null) {
         validateTag(match[1].toLowerCase());
     }
-};
+}
 export function toCamelCase(string) {
     return string
         .split(/[-_\s]/)
@@ -72,9 +76,7 @@ export function convertStyleToObject(html) {
     return html.replaceAll(/style\s*=\s*(".*?")/gi, (match, styleValue) => {
         return `style={${cssToObject(styleValue)}}`;
     });
-}
-export function imageFix(html) {
-    return html.replaceAll('</img>', '');
+// removed stray closing brace
 }
 export function removeInvalidTags(html) {
     return html.replace(/<!DOCTYPE html>|<!DOCTYPE>/gi, '');
@@ -125,8 +127,8 @@ export function validateHtml(html) {
     return 'HTML is valid.';
 }
 export default function convert(html) {
-    html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
+    html = removeInvalidTags(html);
     html = closeSelfClosingTags(html);
     html = convertEventAttributesToCamelCase(html);
     html = convertClassToClassName(html);
@@ -137,6 +139,3 @@ export default function convert(html) {
     html = replaceAttributes(html);
     return indentAllLines(html);
 }
-
-
-export { isTagClosed, validateInput, validateTag, validateTags };
