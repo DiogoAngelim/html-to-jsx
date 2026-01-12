@@ -1,21 +1,26 @@
 name: Publish to NPM
 
-on:
-  push:
-    branches:
-      - main
-  release:
-    types: [published]
-
-permissions:
-  contents: write
-  packages: write
-
-jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build project
+        run: npm run build
+      - name: Run coverage and send to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
+          npm run coverage
         uses: actions/checkout@v4
 
       - name: Setup Node.js
