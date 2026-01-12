@@ -137,3 +137,4 @@ export default function convert(html) {
     html = replaceAttributes(html);
     return indentAllLines(html);
 }
+export { cssToObject, isTagClosed, validateInput, validateTag, validateTags };

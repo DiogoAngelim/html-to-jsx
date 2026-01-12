@@ -180,3 +180,115 @@ describe('HTML to JSX Converter Tests', () => {
     });
   });
 });
+// Additional coverage tests
+describe('wrapIntoDiv', () => {
+  const { wrapIntoDiv } = require('../index.js');
+  it('should wrap HTML into a div', () => {
+    expect(wrapIntoDiv('<span>Test</span>')).toBe('<div><span>Test</span></div>');
+  });
+});
+
+describe('cssToObject', () => {
+  const fn = require('../index.js').cssToObject;
+  it('should convert CSS string to object', () => {
+    expect(fn('color: red; font-size: 12px;')).toBe('{color: "red", fontSize: "12px"}');
+  });
+  it('should handle empty CSS string', () => {
+    expect(fn('')).toBe('{}');
+  });
+});
+
+describe('indentAllLines', () => {
+  const fn = require('../index.js').indentAllLines;
+  it('should beautify HTML', () => {
+    expect(fn('<div><span>Test</span></div>')).toContain('\n');
+  });
+});
+
+describe('toCamelCase', () => {
+  const { toCamelCase } = require('../index.js');
+  it('should convert kebab-case to camelCase', () => {
+    expect(toCamelCase('font-size')).toBe('fontSize');
+    expect(toCamelCase('background_color')).toBe('backgroundColor');
+    expect(toCamelCase('border radius')).toBe('borderRadius');
+  });
+});
+
+describe('convertStyleToObject', () => {
+  const { convertStyleToObject } = require('../index.js');
+  it('should convert style attribute to JSX object', () => {
+    expect(convertStyleToObject('<div style="color: red;">')).toContain('style={');
+  });
+});
+
+describe('imageFix', () => {
+  const { imageFix } = require('../index.js');
+  it('should remove closing img tags', () => {
+    expect(imageFix('<img src="a.jpg"></img>')).toBe('<img src="a.jpg">');
+  });
+});
+
+describe('removeInvalidTags', () => {
+  const { removeInvalidTags } = require('../index.js');
+  it('should remove DOCTYPE tags', () => {
+    expect(removeInvalidTags('<!DOCTYPE html><div></div>')).toBe('<div></div>');
+  });
+});
+
+describe('removeUnsuportedAttrs', () => {
+  const { removeUnsuportedAttrs } = require('../index.js');
+  it('should remove unsupported xmlns:xlink attribute', () => {
+    expect(removeUnsuportedAttrs('<svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>')).toBe('<svg ></svg>');
+  });
+});
+
+describe('validateInput', () => {
+  const fn = require('../index.js').validateInput;
+  it('should throw TypeError for non-string input', () => {
+    expect(() => fn(123)).toThrow(TypeError);
+  });
+  it('should throw TypeError for empty string', () => {
+    expect(() => fn('')).toThrow(TypeError);
+  });
+});
+
+describe('isTagClosed', () => {
+  const fn = require('../index.js').isTagClosed;
+  it('should return false for self-closing tag', () => {
+    expect(fn('img')).toBe(false);
+  });
+  it('should return true for closing tag', () => {
+    expect(fn('div')).toBe(true);
+  });
+});
+
+describe('validateTag', () => {
+  const fn = require('../index.js').validateTag;
+  it('should throw error for unclosed tag', () => {
+    expect(() => fn('img')).toThrow(Error);
+  });
+  it('should not throw for closed tag', () => {
+    expect(() => fn('div')).not.toThrow();
+  });
+});
+
+describe('validateTags', () => {
+  const fn = require('../index.js').validateTags;
+  it('should throw error for HTML with unclosed tag', () => {
+    expect(() => fn('<img>')).toThrow(Error);
+  });
+  it('should not throw for HTML with closed tag', () => {
+    expect(() => fn('<div></div>')).not.toThrow();
+  });
+});
+
+describe('convert (default export)', () => {
+  const convert = require('../index.js').default;
+  it('should convert HTML to beautified JSX', () => {
+    const html = '<!DOCTYPE html><div class="container" style="color: red;"></div>';
+    const result = convert(html);
+    expect(result).toContain('className');
+    expect(result).toContain('style={');
+    expect(result).not.toContain('DOCTYPE');
+  });
+});
