@@ -1,7 +1,7 @@
 ### Overview
 <!-- Badges -->
 ![Build Status](https://github.com/DiogoAngelim/html-to-jsx/actions/workflows/publish.yml/badge.svg?t=1)
- [![Coverage Status](https://coveralls.io/repos/github/DiogoAngelim/html-to-jsx/badge.svg?branch=main&t=1)](https://coveralls.io/github/DiogoAngelim/html-to-jsx?branch=main&t=1)
+ [![Coverage Status](https://coveralls.io/repos/github/DiogoAngelim/html-to-jsx/badge.svg?branch=main)](https://coveralls.io/github/DiogoAngelim/html-to-jsx?branch=main)
 ![License](https://img.shields.io/github/license/DiogoAngelim/html-to-jsx?style=flat)
 
 This HTML to JSX Library provides functions to manipulate and transform HTML strings in JavaScript. It has utilities to wrap HTML content, close self-closing tags, convert event attributes to camel case, convert class attributes to className, remove HTML comments, indent HTML code, convert inline styles to objects, and validate HTML structure.
