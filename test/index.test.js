@@ -316,4 +316,56 @@ describe('imageFix', () => {
     expect(imageFix('<img src="a.jpg"></img>')).toBe('<img src="a.jpg">');
   });
 });
+  describe('Stress Test: Diverse HTML Inputs', () => {
+    const stressCases = [
+      // Simple tags
+      '<div>Hello</div>',
+      // Nested tags
+      '<div><span><b>Bold</b></span><i>Italic</i></div>',
+      // Self-closing tags
+      '<img src="a.jpg"/><br/><hr/>',
+      // Large input
+      '<ul>' + '<li>Item</li>'.repeat(1000) + '</ul>',
+      // Invalid HTML
+      '<div><span>Missing close',
+      // Comments and unsupported attributes
+      '<!--comment--><svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>',
+      // Mixed case and attributes
+      '<LaBeL FOR="id" autocomplete="off" tabindex="1"></LaBeL>',
+      // Style and class
+      '<div class="x" style="color: blue; font-size: 14px;"></div>',
+      // Deeply nested
+      '<div>' + '<span>'.repeat(50) + 'end' + '</span>'.repeat(50) + '</div>',
+      // Special characters
+      '<p>&amp; &lt; &gt; &quot; &#39;</p>',
+      // Script/style tags
+      '<script>alert("x")</script><style>.x{color:red;}</style>',
+      // SVG with attributes
+      '<svg stroke-width="2" stroke-linejoin="round"></svg>',
+      // Table structure
+      '<table><tr><td>Cell</td></tr></table>',
+      // Form elements
+      '<form><input type="text"/><button>Go</button></form>',
+      // Large attribute set
+      '<div ' + Array(50).fill('data-x="1"').join(' ') + '></div>',
+      // Unusual whitespace
+      '<div>   <span>   spaced   </span>   </div>',
+      // HTML entities
+      '<div>&#169; &#x1F600;</div>',
+      // Multiple root elements
+      '<div>One</div><div>Two</div>',
+      // Empty input
+      '',
+    ];
+
+    stressCases.forEach((html, idx) => {
+      it(`should robustly convert stress case #${idx + 1}`, () => {
+        expect(() => convert(html)).not.toThrow();
+        const result = convert(html);
+        expect(typeof result).toBe('string');
+        // For non-empty input, result should not be empty
+        if (html) expect(result.length).toBeGreaterThan(0);
+      });
+    });
+  });
 
