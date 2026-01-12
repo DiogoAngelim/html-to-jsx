@@ -23,6 +23,12 @@
     "convert"
   ],
   "author": "Diogo Angelim",
+  "contributors": [
+    {
+      "name": "Mateus Nava",
+      "url": "https://github.com/mateusnava"
+    }
+  ],
   "license": "MIT",
   "funding": "https://www.paypal.com/donate/?hosted_button_id=XA5LN4XR39PMQ",
   "bugs": {

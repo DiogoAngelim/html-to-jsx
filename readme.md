@@ -6,6 +6,10 @@
 
 This HTML to JSX Library provides functions to manipulate and transform HTML strings in JavaScript. It has utilities to wrap HTML content, close self-closing tags, convert event attributes to camel case, convert class attributes to className, remove HTML comments, indent HTML code, convert inline styles to objects, and validate HTML structure.
 
+### Contributors
+
+- [Mateus Nava](https://github.com/mateusnava)
+
 ### Installation
 
 To use the HTML Converter Library in your project, you can install it via npm:
