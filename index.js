@@ -4,7 +4,7 @@ const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4'
 export function wrapIntoDiv(html) {
     return `<div>${html}</div>`;
 }
-export function cssToObject(cssString) {
+function cssToObject(cssString) {
     const cleanCss = cssString.replace(/['"]/g, '').trim();
     if (!cleanCss)
         return '{}';
@@ -19,10 +19,6 @@ export function cssToObject(cssString) {
     })
         .filter(Boolean);
     return `{${styles.join(', ')}}`;
-}
-
-export function imageFix(html) {
-    return html.replace(/<img([^>]*)><\/img>/gi, '<img$1>');
 }
 const eventAttributesCallback = (_match, eventName, handler) => {
     const newEventName = eventName.slice(2).split('')[0].toUpperCase();
@@ -44,26 +40,26 @@ export function removeComments(html) {
 export function indentAllLines(html) {
     return beautify(html, { format: 'html' });
 }
-export function isTagClosed(tag) {
+const isTagClosed = (tag) => {
     return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
-}
-export function validateInput(html) {
+};
+const validateInput = (html) => {
     if (typeof html !== 'string' || html.trim() === '' || !html) {
         throw new TypeError('Input must be valid a string.');
     }
-}
-export function validateTag(tag) {
+};
+const validateTag = (tag) => {
     if (!isTagClosed(tag)) {
         throw new Error(`Tag <${tag}> is not closed.`);
     }
-}
-export function validateTags(html) {
+};
+const validateTags = (html) => {
     let match;
     const regex = /<([^\s>\/]+)/g;
     while ((match = regex.exec(html)) !== null) {
         validateTag(match[1].toLowerCase());
     }
-}
+};
 export function toCamelCase(string) {
     return string
         .split(/[-_\s]/)
@@ -76,7 +72,9 @@ export function convertStyleToObject(html) {
     return html.replaceAll(/style\s*=\s*(".*?")/gi, (match, styleValue) => {
         return `style={${cssToObject(styleValue)}}`;
     });
-// removed stray closing brace
+}
+export function imageFix(html) {
+    return html.replaceAll('</img>', '');
 }
 export function removeInvalidTags(html) {
     return html.replace(/<!DOCTYPE html>|<!DOCTYPE>/gi, '');
@@ -127,8 +125,8 @@ export function validateHtml(html) {
     return 'HTML is valid.';
 }
 export default function convert(html) {
-    html = wrapIntoDiv(html);
     html = removeInvalidTags(html);
+    html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
     html = convertEventAttributesToCamelCase(html);
     html = convertClassToClassName(html);
@@ -139,3 +137,4 @@ export default function convert(html) {
     html = replaceAttributes(html);
     return indentAllLines(html);
 }
+export { isTagClosed, validateTag, validateTags, cssToObject, validateInput };
