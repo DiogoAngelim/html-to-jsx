@@ -20,6 +20,55 @@ describe('targeted coverage for uncovered lines', () => {
     expect(convertClassToClassName('<div></div>')).toBe('<div></div>'); // line 123
   });
 });
+
+// Stress test: Convert HTML to React syntax and transpile with Babel
+const babel = require('@babel/core');
+const htmlToJsx = require('../index.js').default;
+
+describe('stress test: Babel transpile React output', () => {
+  it('should transpile converted JSX to valid JS', () => {
+    const html = '<div class="test"><span>Hello <b>world</b>!</span></div>';
+    const jsx = htmlToJsx(html); // Your converter function
+    const code = `import React from 'react';\nexport default () => (${jsx});`;
+    const result = babel.transformSync(code, {
+      presets: [require.resolve('@babel/preset-env'), require.resolve('@babel/preset-react')],
+    });
+    expect(result && result.code).toMatch(/createElement/);
+  });
+
+  it('should handle complex SVGs and style attributes', () => {
+    const edgeCases = [
+      // Complex SVG with nested elements and attributes
+      `<svg width="100" height="100"><g><rect x="10" y="10" width="80" height="80" style="fill: red; stroke-width: 2; stroke: black;"/><circle cx="50" cy="50" r="30" style="fill: blue; opacity: 0.5;"/></g></svg>`,
+      // Inline style with various CSS properties
+      `<div style="background: linear-gradient(to right, #fff, #000); border: 1px solid #ccc; padding: 10px;">Styled Div</div>`,
+      // SVG with unsupported/edge attributes
+      `<svg><path d="M10 10 H 90 V 90 H 10 Z" vector-effect="non-scaling-stroke"/></svg>`,
+      // Deeply nested elements
+      `<div><section><article><p style="color: green; font-weight: bold;">Deep</p></article></section></div>`,
+      // SVG with camelCase and kebab-case attributes
+      `<svg><ellipse cx="50" cy="50" rx="30" ry="20" stroke-width="4" stroke-linecap="round"/></svg>`,
+      // HTML with class, for, and style
+      `<label for="input1" style="display: block; margin-bottom: 5px;">Label</label><input id="input1" class="input-class" style="border: 0; outline: none;"/>`,
+      // SVG with nested <text> and <tspan>
+      `<svg><text x="10" y="20" style="font-size: 16px;"><tspan fill="red">Red</tspan> and <tspan fill="blue">Blue</tspan></text></svg>`,
+      // HTML with multiple style and class attributes
+      `<div class="a b c" style="color: #123; background: #eee;">Multi-class styled</div>`,
+      // SVG with <defs> and <linearGradient>
+      `<svg><defs><linearGradient id="grad1"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" /></linearGradient></defs><rect width="100" height="100" fill="url(#grad1)" /></svg>`,
+      // HTML with unusual whitespace and comments
+      `<div   style = " color : red ; "> <!-- comment --> Weird spacing </div>`
+    ];
+    for (const html of edgeCases) {
+      const jsx = htmlToJsx(html);
+      const code = `import React from 'react';\nexport default () => (${jsx});`;
+      const result = babel.transformSync(code, {
+        presets: [require.resolve('@babel/preset-env'), require.resolve('@babel/preset-react')],
+      });
+      expect(result && result.code).toMatch(/createElement/);
+    }
+  });
+});
 import {
   closeSelfClosingTags,
   convertEventAttributesToCamelCase,
