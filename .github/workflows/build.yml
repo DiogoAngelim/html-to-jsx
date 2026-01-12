@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Force clear npm cache
+        run: npm cache clean --force
+      - name: Remove node_modules and lockfile
+        run: rm -rf node_modules package-lock.json
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Setup Node.js
