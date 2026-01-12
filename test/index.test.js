@@ -282,6 +282,8 @@ describe('validateTags', () => {
   });
 });
 
+
+
 describe('convert (default export)', () => {
   const convert = require('../index.js').default;
   it('should convert HTML to beautified JSX', () => {
@@ -290,5 +292,8 @@ describe('convert (default export)', () => {
     expect(result).toContain('className');
     expect(result).toContain('style={');
     expect(result).not.toContain('DOCTYPE');
+  });
+  it('should handle empty input gracefully', () => {
+    expect(() => convert('')).not.toThrow();
   });
 });
