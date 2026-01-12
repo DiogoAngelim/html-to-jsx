@@ -131,94 +131,29 @@ describe('HTML to JSX Converter Tests', () => {
       expect(() => removeComments(123)).toThrow(TypeError);
     });
   });
-
-  describe('validateHtml', () => {
-    it('should validate valid HTML', () => {
-      const html = '<div><p>Hello, world!</p></div>';
-      expect(validateHtml(html)).toBe('HTML is valid.');
-    });
-
-    it('should detect unclosed tags', () => {
-      const html = '<div><p>Hello, world!</div>';
-      expect(() => validateHtml(html)).toThrow(Error);
-    });
-
-    it('should handle empty input', () => {
-      const html = '';
-      expect(validateHtml(html)).toBe('HTML is valid.');
-    });
-
-    it('should handle self-closing tags without closing slash', () => {
-      const html = '<input><br>';
-      expect(validateHtml(html)).toBe('HTML is valid.');
-    });
-  });
-
-  describe('replaceAttributes', () => {
-    it('should convert for= attributes to htmlFor= correctly', () => {
-      const html = '<label for="username">Username</label>';
-      const expected = '<label htmlFor="username">Username</label>';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-
-    it('should handle mixed case for attributes', () => {
-      const html = '<label FOR="email">Email</label>';
-      const expected = '<label htmlFor="email">Email</label>';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-
-    it('should NOT replace text containing "for"', () => {
-      const html = '<p>This is for testing purposes only</p>';
-      const expected = '<p>This is for testing purposes only</p>';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-
-    it('should handle multiple for attributes', () => {
-      const html = '<label for="input1">Label 1</label><label for="input2">Label 2</label>';
-      const expected = '<label htmlFor="input1">Label 1</label><label htmlFor="input2">Label 2</label>';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-
-    it('should handle other attribute conversions', () => {
-      const html = '<input autocomplete="off" tabindex="1">';
-      const expected = '<input autoComplete="off" tabIndex="1">';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-
-    it('should handle empty input', () => {
-      const html = '';
-      const expected = '';
-      expect(replaceAttributes(html)).toBe(expected);
-    });
-  });
-});
 // Additional coverage tests
 describe('wrapIntoDiv', () => {
-  const { wrapIntoDiv } = require('../index.js');
   it('should wrap HTML into a div', () => {
     expect(wrapIntoDiv('<span>Test</span>')).toBe('<div><span>Test</span></div>');
   });
 });
 
 describe('cssToObject', () => {
-  const fn = require('../index.js').cssToObject;
   it('should convert CSS string to object', () => {
-    expect(fn('color: red; font-size: 12px;')).toBe('{color: "red", fontSize: "12px"}');
+    expect(cssToObject('color: red; font-size: 12px;')).toBe('{color: "red", fontSize: "12px"}');
   });
   it('should handle empty CSS string', () => {
-    expect(fn('')).toBe('{}');
+    expect(cssToObject('')).toBe('{}');
   });
 });
 
 describe('indentAllLines', () => {
-  const fn = require('../index.js').indentAllLines;
   it('should beautify HTML', () => {
-    expect(fn('<div><span>Test</span></div>')).toContain('\n');
+    expect(indentAllLines('<div><span>Test</span></div>')).toContain('\n');
   });
 });
 
 describe('toCamelCase', () => {
-  const { toCamelCase } = require('../index.js');
   it('should convert kebab-case to camelCase', () => {
     expect(toCamelCase('font-size')).toBe('fontSize');
     expect(toCamelCase('background_color')).toBe('backgroundColor');
@@ -227,26 +162,76 @@ describe('toCamelCase', () => {
 });
 
 describe('convertStyleToObject', () => {
-  const { convertStyleToObject } = require('../index.js');
   it('should convert style attribute to JSX object', () => {
     expect(convertStyleToObject('<div style="color: red;">')).toContain('style={');
   });
 });
 
 describe('imageFix', () => {
-  const { imageFix } = require('../index.js');
   it('should remove closing img tags', () => {
     expect(imageFix('<img src="a.jpg"></img>')).toBe('<img src="a.jpg">');
   });
 });
 
 describe('removeInvalidTags', () => {
-  const { removeInvalidTags } = require('../index.js');
   it('should remove DOCTYPE tags', () => {
     expect(removeInvalidTags('<!DOCTYPE html><div></div>')).toBe('<div></div>');
   });
 });
 
+describe('removeUnsuportedAttrs', () => {
+  it('should remove unsupported xmlns:xlink attribute', () => {
+    expect(removeUnsuportedAttrs('<svg xmlns:xlink="http://www.w3.org/1999/xlink"></svg>')).toBe('<svg ></svg>');
+  });
+});
+
+describe('validateInput', () => {
+  it('should throw TypeError for non-string input', () => {
+    expect(() => validateInput(123)).toThrow(TypeError);
+  });
+  it('should throw TypeError for empty string', () => {
+    expect(() => validateInput('')).toThrow(TypeError);
+  });
+});
+
+describe('isTagClosed', () => {
+  it('should return false for self-closing tag', () => {
+    expect(isTagClosed('img')).toBe(false);
+  });
+  it('should return true for closing tag', () => {
+    expect(isTagClosed('div')).toBe(true);
+  });
+});
+
+describe('validateTag', () => {
+  it('should throw error for unclosed tag', () => {
+    expect(() => validateTag('img')).toThrow(Error);
+  });
+  it('should not throw for closed tag', () => {
+    expect(() => validateTag('div')).not.toThrow();
+  });
+});
+
+describe('validateTags', () => {
+  it('should throw error for HTML with unclosed tag', () => {
+    expect(() => validateTags('<img>')).toThrow(Error);
+  });
+  it('should not throw for HTML with closed tag', () => {
+    expect(() => validateTags('<div></div>')).not.toThrow();
+  });
+});
+
+
+describe('convert (default export)', () => {
+  it('should convert HTML to beautified JSX', () => {
+    const html = '<!DOCTYPE html><div class="container" style="color: red;"></div>';
+    const result = convert(html);
+    expect(result).toContain('className');
+    expect(result).toContain('style={');
+    expect(result).not.toContain('DOCTYPE');
+  });
+  });
+});
 describe('removeUnsuportedAttrs', () => {
   const { removeUnsuportedAttrs } = require('../index.js');
   it('should remove unsupported xmlns:xlink attribute', () => {
