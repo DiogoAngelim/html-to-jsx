@@ -263,22 +263,22 @@ describe('isTagClosed', () => {
 });
 
 describe('validateTag', () => {
-  const fn = require('../index.js').validateTag;
+  const { validateTag } = require('../index.js');
   it('should throw error for unclosed tag', () => {
-    expect(() => fn('img')).toThrow(Error);
+    expect(() => validateTag('img')).toThrow(Error);
   });
   it('should not throw for closed tag', () => {
-    expect(() => fn('div')).not.toThrow();
+    expect(() => validateTag('div')).not.toThrow();
   });
 });
 
 describe('validateTags', () => {
-  const fn = require('../index.js').validateTags;
+  const { validateTags } = require('../index.js');
   it('should throw error for HTML with unclosed tag', () => {
-    expect(() => fn('<img>')).toThrow(Error);
+    expect(() => validateTags('<img>')).toThrow(Error);
   });
   it('should not throw for HTML with closed tag', () => {
-    expect(() => fn('<div></div>')).not.toThrow();
+    expect(() => validateTags('<div></div>')).not.toThrow();
   });
 });
 
