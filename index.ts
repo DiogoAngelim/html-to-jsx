@@ -181,3 +181,5 @@ export default function convert(html: string): string {
 
     return indentAllLines(html);
 }
+
+export { isTagClosed, validateTag, validateTags, cssToObject };
