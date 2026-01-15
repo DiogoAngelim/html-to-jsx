@@ -1,5 +1,13 @@
 // 100% coverage targeted tests
 describe('targeted coverage for uncovered lines', () => {
+    it('cssToObject should skip style with missing property', () => {
+      // Only value, no property
+      expect(cssToObject(': red;')).toBe('{}');
+    });
+    it('cssToObject should skip style with missing value', () => {
+      // Only property, no value
+      expect(cssToObject('color: ;')).toBe('{}');
+    });
   it('wrapIntoDiv should handle empty string', () => {
     expect(wrapIntoDiv('')).toBe('<div></div>'); // line 16
   });
@@ -19,6 +27,33 @@ describe('targeted coverage for uncovered lines', () => {
   it('convertClassToClassName should handle no class attribute', () => {
     expect(convertClassToClassName('<div></div>')).toBe('<div></div>'); // line 123
   });
+
+  it('eventAttributesCallback should handle short/invalid event names', () => {
+    // eventName too short
+    expect(
+      require('../index.js').eventAttributesCallback('', 'on', 'foo()')
+    ).toBe('on={foo()}');
+
+    // eventName: 'onC', handler: 'bar()'
+    // eventName.slice(2) = 'C', split('')[0] = 'C', toUpperCase = 'C'
+    // eventName.slice(3) = ''
+    expect(
+      require('../index.js').eventAttributesCallback('', 'onC', 'bar()')
+    ).toBe('onC={bar()}');
+
+    // eventName: 'onClick', handler: 'baz()'
+    expect(
+      require('../index.js').eventAttributesCallback('', 'onClick', 'baz()')
+    ).toBe('onClick={baz()}');
+  });
+
+  it('eventAttributesCallback should handle non-string handler', () => {
+    // handler is a number
+    expect(
+      require('../index.js').eventAttributesCallback('', 'onClick', 123)
+    ).toBe('onClick={123}');
+  });
+
 });
 
 // Stress test: Convert HTML to React syntax and transpile with Babel

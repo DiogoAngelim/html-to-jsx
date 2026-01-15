@@ -20,8 +20,13 @@ function cssToObject(cssString) {
     return `{${styles.join(', ')}}`;
 }
 const eventAttributesCallback = (_match, eventName, handler) => {
-    const newEventName = eventName.slice(2).split('')[0].toUpperCase();
-    return `on${newEventName}${eventName.slice(3)}={${handler}}`;
+    // Defensive: eventName should be at least 3 chars (e.g., 'onX')
+    let newEventName = '';
+    if (typeof eventName === 'string' && eventName.length > 2) {
+        const first = eventName.slice(2).split('')[0];
+        newEventName = first ? first.toUpperCase() : '';
+    }
+    return `on${newEventName}${eventName && eventName.length > 3 ? eventName.slice(3) : ''}={${handler}}`;
 };
 export function closeSelfClosingTags(html) {
     const result = html.replaceAll(new RegExp(`<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`, "gi"), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ""}/>`);
@@ -120,20 +125,6 @@ export function validateHtml(html) {
     }
     return 'HTML is valid.';
 }
-export function indentAllLines(html, options) {
-    if (options && options.indentCode) {
-        try {
-            // Dynamically require beautify only if indentCode is true
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const beautify = require('beautify');
-            return beautify(html, { format: 'html' });
-        }
-        catch (e) {
-            throw new Error('Beautify is not installed. Please install it or disable indentCode.');
-        }
-    }
-    return html;
-}
 export default function convert(html, options) {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
@@ -145,6 +136,6 @@ export default function convert(html, options) {
     html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
     html = replaceAttributes(html);
-    return indentAllLines(html, options);
+    return html;
 }
-export { isTagClosed, validateTag, validateTags, cssToObject, validateInput };
+export { isTagClosed, validateTag, validateTags, cssToObject, validateInput, eventAttributesCallback };
