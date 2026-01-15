@@ -1,9 +1,10 @@
+// Removed duplicate default export
 const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
 const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
 export function wrapIntoDiv(html) {
     return `<div>${html}</div>`;
 }
-function cssToObject(cssString) {
+export function cssToObject(cssString) {
     const cleanCss = cssString.replace(/['"]/g, '').trim();
     if (!cleanCss)
         return '{}';
@@ -19,8 +20,7 @@ function cssToObject(cssString) {
         .filter(Boolean);
     return `{${styles.join(', ')}}`;
 }
-const eventAttributesCallback = (_match, eventName, handler) => {
-    // Defensive: eventName should be at least 3 chars (e.g., 'onX')
+export const eventAttributesCallback = (_match, eventName, handler) => {
     let newEventName = '';
     if (typeof eventName === 'string' && eventName.length > 2) {
         const first = eventName.slice(2).split('')[0];
@@ -29,11 +29,11 @@ const eventAttributesCallback = (_match, eventName, handler) => {
     return `on${newEventName}${eventName && eventName.length > 3 ? eventName.slice(3) : ''}={${handler}}`;
 };
 export function closeSelfClosingTags(html) {
-    const result = html.replaceAll(new RegExp(`<(${selfClosingTags.join("|")})(?=[\\s>/])([^>]*)\\s*/?>`, "gi"), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ""}/>`);
+    const result = html.replaceAll(new RegExp(`<(${selfClosingTags.join("|")})(?=[\s>/])([^>]*)\s*/?>`, "gi"), (_match, tagName, attributes) => `<${tagName}${attributes ? attributes : ""}/>`);
     return result.replace(/\/\/>/g, "/>");
 }
 export function convertEventAttributesToCamelCase(html) {
-    return html.replaceAll(/(\bon\w+)=["']([^"']+)["']/g, eventAttributesCallback);
+    return html.replaceAll(/(\bon\w+)=['"]([^'"]+)['"]/g, eventAttributesCallback);
 }
 export function convertClassToClassName(html) {
     return html.replaceAll(/class=/g, 'className=');
@@ -41,28 +41,28 @@ export function convertClassToClassName(html) {
 export function removeComments(html) {
     return html.replaceAll(/<!--[\s\S]*?-->/g, '');
 }
-const isTagClosed = (tag) => {
+export const isTagClosed = (tag) => {
     return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
 };
-const validateInput = (html) => {
+export const validateInput = (html) => {
     if (typeof html !== 'string' || html.trim() === '' || !html) {
         throw new TypeError('Input must be valid a string.');
     }
 };
-const validateTag = (tag) => {
+export const validateTag = (tag) => {
     if (!isTagClosed(tag)) {
         throw new Error(`Tag <${tag}> is not closed.`);
     }
 };
-const validateTags = (html) => {
+export const validateTags = (html) => {
     let match;
-    const regex = /<([^\s>\/]+)/g;
+    const regex = /<([^\s>/]+)/g;
     while ((match = regex.exec(html)) !== null) {
         validateTag(match[1].toLowerCase());
     }
 };
-export function toCamelCase(string) {
-    return string
+export function toCamelCase(str) {
+    return str
         .split(/[-_\s]/)
         .map((word, index) => index === 0
         ? word.toLowerCase()
@@ -125,7 +125,7 @@ export function validateHtml(html) {
     }
     return 'HTML is valid.';
 }
-export default function convert(html, options) {
+export function convert(html, options) {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
@@ -138,4 +138,4 @@ export default function convert(html, options) {
     html = replaceAttributes(html);
     return html;
 }
-export { isTagClosed, validateTag, validateTags, cssToObject, validateInput, eventAttributesCallback };
+export default convert;
