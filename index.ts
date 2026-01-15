@@ -1,5 +1,3 @@
-import beautify from 'beautify';
-
 const selfClosingTags: string[] = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
 const tagsRequiringClosing = new Set<string>(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
 
@@ -56,10 +54,6 @@ export function convertClassToClassName(html: string): string {
 
 export function removeComments(html: string): string {
     return html.replaceAll(/<!--[\s\S]*?-->/g, '');
-}
-
-export function indentAllLines(html: string): string {
-    return beautify(html, { format: 'html' });
 }
 
 const isTagClosed = (tag: string): boolean => {
@@ -167,7 +161,25 @@ export function validateHtml(html: string): string {
     return 'HTML is valid.';
 }
 
-export default function convert(html: string): string {
+export interface ConvertOptions {
+    indentCode?: boolean;
+}
+
+export function indentAllLines(html: string, options?: { indentCode?: boolean }): string {
+    if (options && options.indentCode) {
+        try {
+            // Dynamically require beautify only if indentCode is true
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const beautify = require('beautify');
+            return beautify(html, { format: 'html' });
+        } catch (e) {
+            throw new Error('Beautify is not installed. Please install it or disable indentCode.');
+        }
+    }
+    return html;
+}
+
+export default function convert(html: string, options?: ConvertOptions): string {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
@@ -178,8 +190,7 @@ export default function convert(html: string): string {
     html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
     html = replaceAttributes(html);
-
-    return indentAllLines(html);
+    return indentAllLines(html, options);
 }
 
 export { isTagClosed, validateTag, validateTags, cssToObject, validateInput };

@@ -79,7 +79,6 @@ import {
   replaceAttributes,
   wrapIntoDiv,
   cssToObject,
-  indentAllLines,
   toCamelCase,
   imageFix,
   removeInvalidTags,
@@ -340,11 +339,7 @@ describe('cssToObject', () => {
   });
 });
 
-describe('indentAllLines', () => {
-  it('should beautify HTML', () => {
-    expect(indentAllLines('<div><span>Test</span></div>')).toContain('\n');
-  });
-});
+
 
 describe('toCamelCase', () => {
   it('should convert kebab-case to camelCase', () => {

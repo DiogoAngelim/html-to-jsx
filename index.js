@@ -1,4 +1,3 @@
-import beautify from 'beautify';
 const selfClosingTags = ['input', 'img', 'br', 'hr', 'meta', 'link', 'col', 'area', 'base'];
 const tagsRequiringClosing = new Set(['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'form', 'button', 'textarea', 'select', 'option', 'a']);
 export function wrapIntoDiv(html) {
@@ -36,9 +35,6 @@ export function convertClassToClassName(html) {
 }
 export function removeComments(html) {
     return html.replaceAll(/<!--[\s\S]*?-->/g, '');
-}
-export function indentAllLines(html) {
-    return beautify(html, { format: 'html' });
 }
 const isTagClosed = (tag) => {
     return !selfClosingTags.includes(tag) && tagsRequiringClosing.has(tag);
@@ -124,7 +120,21 @@ export function validateHtml(html) {
     }
     return 'HTML is valid.';
 }
-export default function convert(html) {
+export function indentAllLines(html, options) {
+    if (options && options.indentCode) {
+        try {
+            // Dynamically require beautify only if indentCode is true
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const beautify = require('beautify');
+            return beautify(html, { format: 'html' });
+        }
+        catch (e) {
+            throw new Error('Beautify is not installed. Please install it or disable indentCode.');
+        }
+    }
+    return html;
+}
+export default function convert(html, options) {
     html = removeInvalidTags(html);
     html = wrapIntoDiv(html);
     html = closeSelfClosingTags(html);
@@ -135,6 +145,6 @@ export default function convert(html) {
     html = convertStyleToObject(html);
     html = removeUnsuportedAttrs(html);
     html = replaceAttributes(html);
-    return indentAllLines(html);
+    return indentAllLines(html, options);
 }
 export { isTagClosed, validateTag, validateTags, cssToObject, validateInput };
