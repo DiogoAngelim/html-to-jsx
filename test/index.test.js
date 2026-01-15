@@ -217,6 +217,22 @@ describe('HTML to JSX Converter Tests', () => {
       const html = '<input><br>';
       expect(validateHtml(html)).toBe('HTML is valid.');
     });
+
+    it('validateHtml should throw for non-string input', () => {
+      expect(() => validateHtml(123)).toThrow(TypeError);
+    });
+
+    it('validateHtml should detect unclosed tags', () => {
+      expect(() => validateHtml('<div><span>')).toThrow(/Unclosed tags/);
+    });
+
+    it('validateHtml should detect unexpected closing tag', () => {
+      expect(() => validateHtml('</div>')).toThrow(/Unexpected closing tag/);
+    });
+
+    it('validateHtml should detect mismatched tags', () => {
+      expect(() => validateHtml('<div></span></div>')).toThrow(/Mismatched tags/);
+    });
   });
 
   describe('replaceAttributes', () => {
@@ -254,6 +270,10 @@ describe('HTML to JSX Converter Tests', () => {
       const html = '';
       const expected = '';
       expect(replaceAttributes(html)).toBe(expected);
+    });
+
+    it('should not replace unrelated attributes', () => {
+      expect(replaceAttributes('<div foo="bar"></div>')).toBe('<div foo="bar"></div>');
     });
   });
 });
