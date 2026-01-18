@@ -93,6 +93,9 @@ describe('stress test: Babel transpile React output', () => {
       `<svg><defs><linearGradient id="grad1"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" /></linearGradient></defs><rect width="100" height="100" fill="url(#grad1)" /></svg>`,
       // HTML with unusual whitespace and comments
       `<div   style = " color : red ; "> <!-- comment --> Weird spacing </div>`
+      ,
+      // Stress test: HTML with different types of commas
+      `<div data-list="a,b,c，d､e﹐f､g，h､i">Comma test: , ， ､ ﹐</div>`
     ];
     for (const html of edgeCases) {
       const jsx = htmlToJsx(html);
