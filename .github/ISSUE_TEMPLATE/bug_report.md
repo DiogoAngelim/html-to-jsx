@@ -1,7 +1,10 @@
 ---
 name: Bug Report
-description: Report a bug to help us improve
+about: Find and report any bugs
+title: ''
 labels: bug
+assignees: ''
+
 ---
 
 **Describe the bug**
