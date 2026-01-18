@@ -38,10 +38,10 @@ See [DEMO](https://diogoangelim.github.io/html-to-jsx-demo/)
 
 This library is primarily designed for manipulating HTML strings in JavaScript environments, particularly for use with frameworks like React.
 
+### Contributing
+
+We welcome contributions! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines and instructions on how to get started.
+
 ### License
 
 This library is open-source and available under the MIT License.
-
-### Contributions
-
-Contributions to the library are welcome. You can contribute by forking the repository and submitting a pull request with your changes.
